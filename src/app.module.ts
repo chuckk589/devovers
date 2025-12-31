@@ -16,6 +16,8 @@ import { BlockedSlot } from './blocked-slots/entities/blocked-slot.entity';
 import { ScheduleConfig } from './schedule-config/entities/schedule-config.entity';
 import { Question } from './questions/entities/question.entity';
 import { Answer } from './questions/entities/answer.entity';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -37,6 +39,7 @@ import { Answer } from './questions/entities/answer.entity';
       inject: [ConfigService],
     }),
     TelegramModule,
+    ServeStaticModule.forRoot({ rootPath: join(__dirname, '.', 'public') }),
     AppointmentsModule,
     UsersModule,
     OwnersModule,

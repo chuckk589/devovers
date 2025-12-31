@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "vue-tsc && vite build",
+    "build": "yarn prebuild&&vite build",
+    "prebuild": "rimraf ../src/public/assets",
     "preview": "vite preview",
     "type-check": "vue-tsc --noEmit"
   },
