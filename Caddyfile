@@ -1,5 +1,5 @@
 ﻿# HTTPS с самоподписанным сертификатом (опционально)
-bercar.online {
+bercar.site {
   reverse_proxy bercar-app:3000 {
     header_up Host {host}
     header_up X-Real-IP {remote}
