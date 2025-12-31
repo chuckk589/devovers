@@ -17,12 +17,7 @@ export class ServiceInfoCallbackHandler extends BaseHandler implements ITelegram
       await this.handleWithError(ctx, async () => {
         await ctx.answerCallbackQuery();
         const serviceInfo =
-          'ℹ️ Информация о сервисе\n\n' +
-          'Этот бот создан с использованием:\n' +
-          '• NestJS - мощный Node.js фреймворк\n' +
-          '• GrammyJS - современная библиотека для Telegram Bot API\n' +
-          '• TypeScript - для типобезопасности\n\n' +
-          'Бот предоставляет удобный интерфейс для работы с сервисом.';
+          'ℹ️ Информация о сервисе\n\n';
         await ctx.reply(serviceInfo);
       });
     });

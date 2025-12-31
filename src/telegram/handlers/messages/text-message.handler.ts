@@ -15,13 +15,13 @@ export class TextMessageHandler extends BaseHandler implements IMessageHandler {
   }
 
   register(bot: Bot): void {
-    bot.on(this.messageType, async (ctx: Context) => {
-      await this.handleWithError(ctx, async () => {
-        if (ctx.message?.text) {
-          await ctx.reply(`Вы написали: ${ctx.message.text}`);
-        }
-      });
-    });
+    // bot.on(this.messageType, async (ctx: Context) => {
+    //   await this.handleWithError(ctx, async () => {
+    //     if (ctx.message?.text) {
+    //       await ctx.reply(`Вы написали: ${ctx.message.text}`);
+    //     }
+    //   });
+    // });
   }
 }
 

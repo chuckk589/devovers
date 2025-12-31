@@ -2,8 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Bot } from 'grammy';
 import { ITelegramHandler } from './interfaces/telegram-handler.interface';
 import { StartHandler } from './commands/start.handler';
-import { HelpHandler } from './commands/help.handler';
-import { EchoHandler } from './commands/echo.handler';
 import { TextMessageHandler } from './messages/text-message.handler';
 import { ErrorHandler } from './error/error.handler';
 import { ServiceInfoCallbackHandler } from './callbacks/service-info.callback';
@@ -18,8 +16,6 @@ export class HandlersRegistryService {
 
   constructor(
     private readonly startHandler: StartHandler,
-    private readonly helpHandler: HelpHandler,
-    private readonly echoHandler: EchoHandler,
     private readonly textMessageHandler: TextMessageHandler,
     private readonly serviceInfoCallbackHandler: ServiceInfoCallbackHandler,
     private readonly errorHandler: ErrorHandler,
@@ -27,8 +23,6 @@ export class HandlersRegistryService {
     // Register all handlers
     this.handlers = [
       this.startHandler,
-      this.helpHandler,
-      this.echoHandler,
       this.textMessageHandler,
       this.serviceInfoCallbackHandler,
       this.errorHandler,

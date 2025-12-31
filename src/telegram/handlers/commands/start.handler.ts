@@ -42,7 +42,7 @@ export class StartHandler extends BaseHandler implements ICommandHandler {
           .row()
           .text('ℹ️ Информация о сервисе', 'service_info');
 
-        await ctx.reply('Привет! Я простой телеграм бот на NestJS и GrammyJS 🚀\n\nВыберите действие:', {
+        await ctx.reply('Привет! Текст 🚀\n\nВыберите действие:', {
           reply_markup: keyboard,
         });
       });
