@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: .
-      target: production
+    command: sh -c " npm run start:prod"
     restart: unless-stopped
     env_file: ./.env
     environment:
