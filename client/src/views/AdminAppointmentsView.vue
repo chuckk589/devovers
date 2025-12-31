@@ -5,14 +5,26 @@
         <v-card>
           <v-card-title class="d-flex align-center justify-space-between">
             <span>Заявки</span>
-            <v-btn
-              color="primary"
-              variant="text"
-              icon="mdi-arrow-left"
-              @click="router.push('/admin')"
-            >
-              <v-icon>mdi-arrow-left</v-icon>
-            </v-btn>
+            <div class="d-flex align-center" style="gap: 8px;">
+              <v-btn
+                color="error"
+                variant="elevated"
+                :disabled="!selectedAppointmentId || isDeleting"
+                :loading="isDeleting"
+                @click="handleDeleteClick"
+              >
+                <v-icon start>mdi-delete</v-icon>
+                Удалить
+              </v-btn>
+              <v-btn
+                color="primary"
+                variant="text"
+                icon="mdi-arrow-left"
+                @click="router.push('/admin')"
+              >
+                <v-icon>mdi-arrow-left</v-icon>
+              </v-btn>
+            </div>
           </v-card-title>
           <v-card-text>
             <div v-if="isLoading" class="text-center py-8">
@@ -39,29 +51,64 @@
                 :pagination="true"
                 :paginationPageSize="20"
                 :rowSelection="'single'"
+                :getRowId="(params: any) => params.data.id"
                 style="height: 100%; width: 100%;"
                 @cell-value-changed="onCellValueChanged"
+                @selection-changed="onSelectionChanged"
               />
             </div>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
+
+    <!-- Диалог подтверждения удаления -->
+    <v-dialog v-model="deleteDialog" max-width="400" persistent>
+      <v-card>
+        <v-card-title class="text-h6">Подтверждение удаления</v-card-title>
+        <v-card-text>
+          Вы уверены, что хотите удалить эту заявку? Это действие нельзя отменить.
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="grey"
+            variant="text"
+            @click="deleteDialog = false"
+            :disabled="isDeleting"
+          >
+            Отмена
+          </v-btn>
+          <v-btn
+            color="error"
+            variant="elevated"
+            @click="confirmDelete"
+            :loading="isDeleting"
+          >
+            Удалить
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { AgGridVue } from 'ag-grid-vue3'
 import { themeQuartz } from 'ag-grid-community'
 import { useAppointmentsStore } from '../stores/appointments'
 import type { ColDef } from 'ag-grid-community'
 
 const router = useRouter()
+const route = useRoute()
 const appointmentsStore = useAppointmentsStore()
 const theme = ref(themeQuartz)
 const gridRef = ref<any>(null)
+const selectedAppointmentId = ref<string | null>(null)
+const isDeleting = ref(false)
+const deleteDialog = ref(false)
 
 const appointments = computed(() => appointmentsStore.allAppointments)
 const isLoading = computed(() => appointmentsStore.isLoadingAllAppointments)
@@ -211,7 +258,8 @@ const columnDefs: ColDef[] = [
     },
   },
 ]
-
+// d@c87VtgHSb34s
+// 147.45.97.43
 const defaultColDef: ColDef = {
   sortable: true,
   filter: false,
@@ -241,8 +289,76 @@ async function onCellValueChanged(params: any) {
     }
   }
 }
-onMounted(() => {
-  appointmentsStore.loadAllAppointments()
+// Функция для выделения строки по ID
+const selectRowById = (appointmentId: string) => {
+  if (!gridRef.value?.api) return
+  
+  const gridApi = gridRef.value.api
+  const rowNode = gridApi.getRowNode(appointmentId)
+  
+  if (rowNode) {
+    // Выделяем строку
+    rowNode.setSelected(true)
+    // Прокручиваем к строке
+    gridApi.ensureNodeVisible(rowNode, 'middle')
+  } 
+}
+
+// Обработка query параметра id при загрузке
+const handleQueryId = async () => {
+  const appointmentId = route.query.id as string | undefined
+  
+  if (appointmentId && !isLoading.value && appointments.value.length > 0) {
+    await nextTick()
+    selectRowById(appointmentId)
+  }
+}
+
+// Отслеживаем загрузку данных и query параметры
+watch([() => isLoading.value, () => appointments.value.length, () => route.query.id], 
+  async ([newIsLoading, newAppointmentsLength, newId]) => {
+    if (!newIsLoading && newAppointmentsLength > 0 && newId) {
+      await nextTick()
+      selectRowById(newId as string)
+    }
+  }
+)
+
+// Обработчик изменения выбора строки
+const onSelectionChanged = () => {
+  if (gridRef.value?.api) {
+    const selectedRows = gridRef.value.api.getSelectedRows()
+    selectedAppointmentId.value = selectedRows.length > 0 ? selectedRows[0].id : null
+  }
+}
+
+// Обработчик клика на кнопку удаления
+const handleDeleteClick = () => {
+  if (selectedAppointmentId.value) {
+    deleteDialog.value = true
+  }
+}
+
+// Подтверждение удаления
+const confirmDelete = async () => {
+  if (!selectedAppointmentId.value) return
+  
+  isDeleting.value = true
+  try {
+    await appointmentsStore.deleteAppointment(selectedAppointmentId.value)
+    selectedAppointmentId.value = null
+    deleteDialog.value = false
+  } catch (error) {
+    console.error('Ошибка удаления:', error)
+  } finally {
+    isDeleting.value = false
+  }
+}
+
+onMounted(async () => {
+  await appointmentsStore.loadAllAppointments()
+  // Обрабатываем query параметр после загрузки
+  await handleQueryId()
 })
 </script>
 

@@ -32,11 +32,11 @@ import { Answer } from './questions/entities/answer.entity';
         password: configService.get('DB_PASSWORD', 'postgres'),
         database: configService.get('DB_DATABASE', 'devovers'),
         entities: [Appointment, User, Owner, BlockedSlot, ScheduleConfig, Question, Answer],
-        synchronize: configService.get('NODE_ENV') !== 'production', // В продакшене использовать миграции
+        synchronize: true, // В продакшене использовать миграции
       }),
       inject: [ConfigService],
     }),
-    // TelegramModule,
+    TelegramModule,
     AppointmentsModule,
     UsersModule,
     OwnersModule,

@@ -225,11 +225,35 @@ export class AppointmentsService {
     return appointments.some(a => a.timeSlot === slotTimeWithSeconds);
   }
 
-  async findAll(): Promise<Appointment[]> {
-    return this.appointmentsRepository.find({
-      relations: ['user'],
-      order: { appointmentDate: 'DESC', timeSlot: 'DESC', createdAt: 'DESC' },
-    });
+  async findAll(start?: string, end?: string): Promise<Appointment[]> {
+    const queryBuilder = this.appointmentsRepository
+      .createQueryBuilder('appointment')
+      .leftJoinAndSelect('appointment.user', 'user')
+      .orderBy('appointment.appointmentDate', 'DESC')
+      .addOrderBy('appointment.timeSlot', 'ASC')
+      .addOrderBy('appointment.createdAt', 'DESC');
+
+    // Если указаны даты начала и конца, фильтруем по ним
+    if (start) {
+      const startDate = new Date(start);
+      if (!isNaN(startDate.getTime())) {
+        queryBuilder.andWhere('DATE(appointment.appointmentDate) >= DATE(:startDate)', {
+          startDate: start,
+        });
+      }
+    }
+
+    if (end) {
+      const endDate = new Date(end);
+      if (!isNaN(endDate.getTime())) {
+        queryBuilder.andWhere('DATE(appointment.appointmentDate) <= DATE(:endDate)', {
+          endDate: end,
+        });
+      }
+    }
+
+    
+    return queryBuilder.getMany();
   }
 
   async findByTelegramId(telegramId: number): Promise<Appointment[]> {
@@ -262,6 +286,11 @@ export class AppointmentsService {
 
   async cancel(id: string): Promise<Appointment> {
     return this.updateStatus(id, AppointmentStatus.CANCELLED);
+  }
+
+  async remove(id: string): Promise<void> {
+    const appointment = await this.findOne(id);
+    await this.appointmentsRepository.remove(appointment);
   }
 
   private async generateFancyID(): Promise<string> {
@@ -331,22 +360,18 @@ export class AppointmentsService {
     const fancyID = await this.generateFancyID();
 
     // Создаем appointment
-    // Если customCarBrand указан, используем его как carBrand
-    const carBrand = createAppointmentDto.customCarBrand || createAppointmentDto.carBrand;
 
     const appointment = this.appointmentsRepository.create({
       fancyID,
       serviceId: createAppointmentDto.serviceId,
       customService: createAppointmentDto.customService,
       maintenanceInfo: createAppointmentDto.maintenanceInfo,
-      carBrand: carBrand,
-      customCarBrand: createAppointmentDto.customCarBrand,
+      carBrand: createAppointmentDto.carBrand,
       carModel: createAppointmentDto.carModel,
       carYear: createAppointmentDto.carYear,
       licensePlate: createAppointmentDto.licensePlate,
       appointmentDate: appointmentDate,
       timeSlot: createAppointmentDto.timeSlot,
-      clientName: createAppointmentDto.clientName,
       clientPhone: createAppointmentDto.clientPhone,
       comment: createAppointmentDto.comment,
       status: createAppointmentDto.status || AppointmentStatus.PENDING,

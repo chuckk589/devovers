@@ -19,7 +19,10 @@ export class BlockedSlotsController {
   constructor(private readonly blockedSlotsService: BlockedSlotsService) {}
 
   @Get()
-  async findAll(@Query('date') date?: string) {
+  async findAll(@Query('date') date?: string, @Query('start') start?: string, @Query('end') end?: string) {
+    if (start && end) {
+      return this.blockedSlotsService.findByDateRange(start, end);
+    }
     if (date) {
       return this.blockedSlotsService.findByDate(date);
     }

@@ -39,7 +39,6 @@ const formData = ref({
     phone: '',
     comment: '',
     carBrand: '',
-    customCarBrand: '',
     carModel: '',
     carYear: '',
     licensePlate: '',
@@ -49,8 +48,6 @@ const serviceCategories: ServiceCategory[] = [
     { id: 'maintenance', label: 'Техническое обслуживание (ТО)', type: 'maintenance' },
     { id: 'diagnostics', label: 'Диагностика' },
     { id: 'suspension', label: 'Ремонт ходовой' },
-    { id: 'tire-service', label: 'Шиномонтаж' },
-    { id: 'bodywork', label: 'Кузовные работы' },
     { id: 'other', label: 'Другое', type: 'other' },
 ]
 
@@ -124,7 +121,7 @@ const isNextButtonDisabled = computed(() => {
 
     // Шаг 3: марка и модель автомобиля обязательны
     if (currentStep.value === 3) {
-        if (!formData.value.customCarBrand || formData.value.customCarBrand.trim().length === 0) {
+        if (!formData.value.carBrand || formData.value.carBrand.trim().length === 0) {
             return true
         }
         if (!formData.value.carModel || formData.value.carModel.trim().length === 0) {
@@ -159,8 +156,7 @@ const handleSubmit = async () => {
             serviceId: formData.value.service,
             customService: formData.value.service === 'other' ? formData.value.customService : undefined,
             maintenanceInfo: formData.value.maintenanceInfo || undefined,
-            carBrand: formData.value.customCarBrand || 'Unknown',
-            customCarBrand: formData.value.customCarBrand || undefined,
+            carBrand: formData.value.carBrand || 'Unknown',
             carModel: formData.value.carModel || undefined,
             carYear: formData.value.carYear || undefined,
             licensePlate: formData.value.licensePlate || undefined,
@@ -227,7 +223,7 @@ onMounted(async () => {
 // Watch for date changes and update selected date in store, then switch to slots step
 watch(() => formData.value.date, (newDate) => {
     if (newDate) {
-        appointmentsStore.setSelectedDate(newDate)
+        appointmentsStore.setSelectedDate(newDate as any)
         // Automatically switch to slots step when date is selected
         if (dateTimeStep.value === 0) {
             nextTick(() => {
@@ -466,7 +462,7 @@ const validationRules = {
                 <div class="step-content">
                     <div class="step-title">Информация об автомобиле</div>
 
-                    <v-text-field v-model="formData.customCarBrand" label="Укажите марку автомобиля" variant="outlined"
+                    <v-text-field v-model="formData.carBrand" label="Укажите марку автомобиля" variant="outlined"
                         placeholder="Введите марку" :rules="[validationRules.carBrand]"
                         class="custom-brand-field"></v-text-field>
 
@@ -537,9 +533,9 @@ const validationRules = {
                     <div class="review-section">
                         <div class="review-section-title">Информация об автомобиле</div>
                         <div class="review-section-content">
-                            <div v-if="formData.customCarBrand" class="review-item">
+                            <div v-if="formData.carBrand" class="review-item">
                                 <span class="review-label">Марка:</span>
-                                <span class="review-value">{{ formData.customCarBrand }}</span>
+                                <span class="review-value">{{ formData.carBrand }}</span>
                             </div>
                             <div v-if="formData.carModel" class="review-item">
                                 <span class="review-label">Модель:</span>

@@ -40,7 +40,27 @@ export class BlockedSlotsService {
     return this.blockedSlotsRepository
       .createQueryBuilder('blockedSlot')
       .where("DATE(blockedSlot.date) = DATE(:date)", { date: dateStr })
-      .orderBy('blockedSlot.startTime', 'ASC')
+      .orderBy('blockedSlot.timeSlot', 'ASC')
+      .getMany();
+  }
+
+  async findByDateRange(start: string, end: string): Promise<BlockedSlot[]> {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      throw new BadRequestException('Неверный формат даты');
+    }
+
+    const startStr = startDate.toISOString().split('T')[0];
+    const endStr = endDate.toISOString().split('T')[0];
+    
+    return this.blockedSlotsRepository
+      .createQueryBuilder('blockedSlot')
+      .where("DATE(blockedSlot.date) >= DATE(:startDate)", { startDate: startStr })
+      .andWhere("DATE(blockedSlot.date) <= DATE(:endDate)", { endDate: endStr })
+      .orderBy('blockedSlot.date', 'ASC')
+      .addOrderBy('blockedSlot.timeSlot', 'ASC')
       .getMany();
   }
 

@@ -39,9 +39,6 @@ export class Appointment {
   carBrand: string;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
-  customCarBrand: string;
-
-  @Column({ type: 'varchar', length: 100, nullable: true })
   carModel: string;
 
   @Column({ type: 'varchar', length: 10, nullable: true })
@@ -59,9 +56,6 @@ export class Appointment {
   @ManyToOne(() => User, (user) => user.appointments, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'userId' })
   user: User;
-
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  clientName: string;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
   clientPhone: string;
@@ -82,4 +76,5 @@ export class Appointment {
   @UpdateDateColumn()
   updatedAt: Date;
 }
+
 

@@ -24,13 +24,13 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit() {
-    try {
-      await this.bot.start();
+    // Запускаем бота асинхронно, не блокируя старт приложения
+    this.bot.start().then(() => {
       this.logger.log('Telegram бот успешно запущен');
-    } catch (error) {
-      this.logger.error(`Ошибка при запуске бота: ${error.message}`);
-      throw error;
-    }
+    }).catch((error) => {
+      this.logger.error(`Ошибка при запуске бота: ${error.message}`, error.stack);
+      // Не бросаем ошибку, чтобы приложение могло продолжить работу
+    });
   }
 
   async onModuleDestroy() {

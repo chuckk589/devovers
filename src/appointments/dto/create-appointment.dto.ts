@@ -20,10 +20,6 @@ export class CreateAppointmentDto {
 
   @IsString()
   @IsOptional()
-  customCarBrand?: string;
-
-  @IsString()
-  @IsOptional()
   carModel?: string;
 
   @IsString()
@@ -44,10 +40,6 @@ export class CreateAppointmentDto {
 
   @IsString()
   @IsOptional()
-  clientName?: string;
-
-  @IsString()
-  @IsOptional()
   clientPhone?: string;
 
   @IsString()
@@ -61,4 +53,5 @@ export class CreateAppointmentDto {
   @IsNumber()
   telegramId: number;
 }
+
 

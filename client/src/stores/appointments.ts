@@ -176,7 +176,7 @@ export const useAppointmentsStore = defineStore('appointments', () => {
   const allAppointments = ref<Appointment[]>([])
   const isLoadingAllAppointments = ref(false)
 
-  async function loadAllAppointments() {
+  async function loadAllAppointments(start?: string, end?: string) {
     isLoadingAllAppointments.value = true
     error.value = null
 
@@ -188,7 +188,16 @@ export const useAppointmentsStore = defineStore('appointments', () => {
         throw new Error('Токен авторизации не найден')
       }
 
-      const response = await fetch(`/api/appointments`, {
+      // Формируем URL с query параметрами, если они указаны
+      const url = new URL('/api/appointments', window.location.origin)
+      if (start) {
+        url.searchParams.append('start', start)
+      }
+      if (end) {
+        url.searchParams.append('end', end)
+      }
+
+      const response = await fetch(url.toString(), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -276,6 +285,41 @@ export const useAppointmentsStore = defineStore('appointments', () => {
     }
   }
 
+  async function deleteAppointment(appointmentId: string) {
+    error.value = null
+
+    try {
+      const authStore = useAuthStore()
+      const token = authStore.token
+      
+      if (!token) {
+        throw new Error('Токен авторизации не найден')
+      }
+
+      const response = await fetch(`/api/appointments/${appointmentId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'Ошибка при удалении заявки')
+      }
+
+      // Удаляем заявку из списка
+      const index = allAppointments.value.findIndex(a => a.id === appointmentId)
+      if (index !== -1) {
+        allAppointments.value.splice(index, 1)
+      }
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Произошла ошибка при удалении заявки'
+      console.error('Ошибка удаления заявки:', err)
+      throw err
+    }
+  }
+
   return {
     // State
     allSlots,
@@ -297,6 +341,7 @@ export const useAppointmentsStore = defineStore('appointments', () => {
     cancelAppointment,
     loadAllAppointments,
     updateAppointmentStatus,
+    deleteAppointment,
   }
 })
 
