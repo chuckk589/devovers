@@ -1,15 +1,4 @@
-﻿# Простая конфигурация для IP-адреса
-:80 {
-  reverse_proxy bercar-app:3000 {
-    header_up Host {host}
-    header_up X-Real-IP {remote}
-    header_up X-Forwarded-For {remote}
-    header_up X-Forwarded-Proto {scheme}
-  }
-}
-
-# HTTPS с самоподписанным сертификатом (опционально)
-:443 {
+﻿:443 {
   tls internal
   reverse_proxy bercar-app:3000 {
     header_up Host {host}
