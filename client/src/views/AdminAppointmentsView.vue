@@ -258,8 +258,7 @@ const columnDefs: ColDef[] = [
     },
   },
 ]
-// d@c87VtgHSb34s
-// 147.45.97.43
+
 const defaultColDef: ColDef = {
   sortable: true,
   filter: false,
